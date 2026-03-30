@@ -1,0 +1,323 @@
+<div class="space-y-8 animate-in fade-in duration-700">
+  <!-- Header & Stats -->
+  <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
+    <div class="space-y-2">
+      <div class="flex items-center gap-3">
+        <span class="px-3 py-1 bg-blue-100 text-blue-700 text-[10px] font-black uppercase tracking-widest rounded-full">Secure Operations</span>
+        <span class="text-slate-300">/</span>
+        <span class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Triage Command</span>
+      </div>
+      <h1 class="text-5xl font-black text-slate-900 tracking-tighter leading-none">Officer Command Center</h1>
+      <p class="text-slate-500 font-medium italic text-lg opacity-80">Active Incident Monitoring & Resource Allocation Unit</p>
+    </div>
+    
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 xl:w-auto">
+      <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-xl transition-all">
+        <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-20 transition-opacity">
+          <svg class="w-8 h-8 text-blue-900" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path></svg>
+        </div>
+        <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest leading-none mb-3">Total Volume</span>
+        <div class="flex items-end gap-2">
+          <span class="text-4xl font-black text-blue-900 leading-none">{{ stats().total }}</span>
+          <span class="text-[10px] font-bold text-emerald-500 pb-0.5">↑ 12%</span>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col relative overflow-hidden group hover:shadow-xl transition-all">
+        <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest leading-none mb-3">Pending Action</span>
+        <div class="flex items-end gap-2">
+          <span class="text-4xl font-black text-amber-600 leading-none">{{ stats().pending }}</span>
+          <span class="text-[10px] font-bold text-slate-400 pb-0.5">STABLE</span>
+        </div>
+      </div>
+      <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200 hidden md:flex flex-col relative overflow-hidden group hover:shadow-xl transition-all">
+        <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest leading-none mb-3">Triage Speed</span>
+        <div class="flex items-end gap-2">
+          <span class="text-4xl font-black text-slate-900 leading-none">14m</span>
+          <span class="text-[10px] font-bold text-emerald-500 pb-0.5">↓ 2.1m</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid Layout -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    
+    <!-- LEFT COLUMN: Incident Feed (2/3) -->
+    <div class="lg:col-span-2 space-y-6">
+      <!-- Filter Bar -->
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center space-x-2 bg-slate-200/50 p-1 rounded-2xl border border-slate-200">
+          <button (click)="setFilter('all')" [class]="'px-5 py-2 rounded-xl text-xs font-black transition-all ' + (filterStatus() === 'all' ? 'bg-white shadow-sm text-blue-900 border border-slate-100' : 'text-slate-500 hover:text-slate-700')">All Cases</button>
+          <button (click)="setFilter('submitted')" [class]="'px-5 py-2 rounded-xl text-xs font-black transition-all ' + (filterStatus() === 'submitted' ? 'bg-white shadow-sm text-blue-900 border border-slate-100' : 'text-slate-500 hover:text-slate-700')">Unassigned</button>
+          <button (click)="setFilter('resolved')" [class]="'px-5 py-2 rounded-xl text-xs font-black transition-all ' + (filterStatus() === 'resolved' ? 'bg-white shadow-sm text-blue-900 border border-slate-100' : 'text-slate-500 hover:text-slate-700')">Resolved</button>
+        </div>
+        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:block">Real-time Stream: Active</span>
+      </div>
+
+      <!-- Scrollable List -->
+      <div class="grid grid-cols-1 gap-4">
+        <div *ngFor="let report of filteredReports()" [class]="'group bg-white rounded-[2.5rem] p-1 border transition-all duration-500 ' + (report.isHighPriority ? 'border-rose-400 shadow-2xl shadow-rose-100 animate-pulse' : 'border-slate-100 shadow-sm hover:shadow-2xl hover:border-blue-200')">
+          <div class="flex flex-col md:flex-row md:items-center p-6 gap-6">
+            <!-- Indicator -->
+            <div class="flex-shrink-0 relative">
+              <div [class]="'w-1.5 h-12 rounded-full ' + (report.status === 'submitted' ? 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.3)]' : report.status === 'assigned' ? 'bg-blue-500' : 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.3)]')"></div>
+            </div>
+
+            <!-- Main Info -->
+            <div class="flex-grow min-w-0">
+              <div class="flex items-center gap-3 mb-1.5">
+                <span class="text-[10px] font-black uppercase text-blue-600 tracking-widest truncate max-w-[80px]">{{ report.id }}</span>
+                <span [class]="'px-2.5 py-1 rounded-full text-[10px] font-black border ' + getSLABadge(report.ageHours)">
+                  SLA: {{ report.ageHours | number:'1.0-0' }}h age
+                </span>
+                <span *ngIf="report.isHighPriority" class="px-2.5 py-1 bg-rose-600 text-white rounded-full text-[8px] font-black uppercase tracking-tighter animate-bounce">URGENT</span>
+              </div>
+              <h3 class="text-xl font-black text-slate-800 truncate tracking-tight mb-1">{{ report.address }}</h3>
+              <p class="text-sm text-slate-500 line-clamp-1 italic font-medium leading-relaxed">{{ report.description }}</p>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex items-center justify-between md:justify-end gap-6 border-t md:border-0 pt-4 md:pt-0 border-slate-50">
+              <div class="text-right flex flex-col">
+                <span class="text-[10px] uppercase font-black text-slate-400 mb-1 tracking-widest">Classification</span>
+                <span class="text-xs font-black text-slate-700 group-hover:text-blue-600 transition-colors uppercase">{{ report.type | titlecase }}</span>
+              </div>
+              <button (click)="selectReport(report)" class="bg-slate-900 text-white px-7 py-3 rounded-2xl text-[11px] font-black shadow-2xl hover:bg-blue-600 hover:scale-105 active:scale-95 transition-all">Review Details</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <p *ngIf="filteredReports().length === 0" class="text-center py-24 text-slate-400 italic bg-white rounded-[3rem] border border-dashed border-slate-200 font-medium">No incidents match the active filter criteria.</p>
+    </div>
+
+    <!-- RIGHT COLUMN: Operational Intelligence (1/3) -->
+    <div class="space-y-6 animate-in slide-in-from-right-10 duration-1000">
+      
+      <!-- System Health Monitor -->
+      <div class="bg-white p-7 rounded-[3rem] shadow-sm border border-slate-100">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xs font-black text-slate-900 uppercase tracking-widest">Platform Integrity</h3>
+          <div class="flex h-1.5 w-1.5 relative">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+          </div>
+        </div>
+        <div class="space-y-5">
+          @for (system of systemHealth(); track system.name) {
+            <div class="flex items-center justify-between group">
+              <div class="flex flex-col">
+                <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider mb-1">{{ system.name }}</span>
+                <div class="flex items-center gap-2">
+                  <div [class]="'w-1 h-1 rounded-full ' + (system.status === 'optimal' ? 'bg-emerald-500' : 'bg-rose-500')"></div>
+                  <span class="text-[11px] font-bold text-slate-700 uppercase tracking-tight">{{ system.status }}</span>
+                </div>
+              </div>
+              <span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">{{ system.latency }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IDEAL FRONTLINE MODAL: Expanded & Responsive -->
+  @if (selectedReport()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-10 bg-slate-900/60 backdrop-blur-lg animate-in fade-in duration-500">
+      <div class="bg-white rounded-[4rem] shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-700 border border-slate-100">
+        
+        <!-- STICKY MODAL HEADER -->
+        <div class="p-8 md:p-12 bg-blue-900 text-white flex-shrink-0 flex items-center justify-between relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-10 opacity-10">
+            <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
+          </div>
+          <div class="relative z-10 flex items-center gap-4 md:gap-8">
+            <div>
+              <span class="text-[10px] uppercase font-black tracking-widest text-blue-300 mb-1 block">Case Audit Record</span>
+              <h2 class="text-3xl md:text-5xl font-black tracking-tighter">{{ selectedReport()?.id }}</h2>
+            </div>
+            <!-- AI Priority Badge -->
+            <div [class]="'px-4 md:px-6 py-2 md:py-3 rounded-2xl flex flex-col items-center justify-center border border-white/20 shadow-xl ' + getPriorityInfo(selectedReport()).class">
+              <span class="text-[8px] font-black uppercase tracking-widest opacity-80">{{ getPriorityInfo(selectedReport()).code }}</span>
+              <span class="text-[10px] md:text-xs font-black tracking-tighter whitespace-nowrap uppercase">{{ getPriorityInfo(selectedReport()).label }}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 relative z-10">
+            <button (click)="toggleEditMode()" [class]="'w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center border border-white/20 transition-all ' + (isEditing() ? 'bg-amber-500' : 'bg-white/10 hover:bg-white/20 text-white')">
+              <svg *ngIf="!isEditing()" class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+              <svg *ngIf="isEditing()" class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <button (click)="selectReport(null)" class="w-12 h-12 md:w-14 md:h-14 bg-white/10 hover:bg-white text-blue-900 rounded-full flex items-center justify-center transition-all border border-white/20">
+              <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- SCROLLABLE CONTENT BODY -->
+        <div class="flex-grow p-8 md:p-16 space-y-12 overflow-y-auto custom-scrollbar relative">
+          
+          <!-- UNIT SELECTION OVERLAY WITH SPECIALTY MATCHING -->
+          <div *ngIf="showUnitSelector()" class="absolute inset-x-8 md:inset-x-16 top-0 z-40 bg-white/95 backdrop-blur-md rounded-[3rem] p-10 border border-blue-100 shadow-2xl animate-in fade-in slide-in-from-top-10 duration-500">
+            <div class="flex items-center justify-between mb-8">
+              <div class="space-y-1">
+                <h3 class="text-xs font-black text-blue-900 uppercase tracking-widest">Active Duty Municipal Units</h3>
+                <p class="text-[10px] text-slate-500 font-bold italic">AI Recommendation engine matching specialties to case category.</p>
+              </div>
+              <button (click)="showUnitSelector.set(false)" class="text-[10px] font-black uppercase text-slate-400 hover:text-rose-600 transition-colors">Cancel Selection</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              @for (unit of availableUnits(); track unit.id) {
+                <button 
+                  (click)="assignUnit(unit.id)" 
+                  [disabled]="unit.status === 'busy'"
+                  [class]="'group flex items-center justify-between p-6 rounded-[2.5rem] border-2 transition-all relative overflow-hidden ' + 
+                    (unit.status === 'busy' ? 'bg-slate-50 border-slate-50 opacity-40 cursor-not-allowed' : 
+                    isUnitRecommended(unit) ? 'border-emerald-500 bg-emerald-50 shadow-xl shadow-emerald-100 scale-[1.02]' : 'border-slate-100 hover:border-blue-500 hover:bg-blue-50')"
+                >
+                  <div *ngIf="isUnitRecommended(unit) && unit.status === 'available'" class="absolute -top-1 -right-1">
+                    <span class="bg-emerald-600 text-white text-[8px] font-black px-3 py-1 rounded-bl-2xl uppercase tracking-tighter">Recommended Match</span>
+                  </div>
+
+                  <div class="flex items-center gap-5 text-left relative z-10">
+                    <div [class]="'w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ' + 
+                      (unit.status === 'available' ? (isUnitRecommended(unit) ? 'bg-emerald-600 text-white shadow-lg' : 'bg-blue-600 text-white') : 'bg-slate-300 text-slate-500')">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" [attr.d]="unit.icon"></path></svg>
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="block text-sm font-black text-slate-800">{{ unit.name }}</span>
+                        <span [class]="'text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ' + 
+                          (unit.status === 'available' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-200 text-slate-500')">
+                          {{ unit.status }}
+                        </span>
+                      </div>
+                      <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{{ unit.specialty }} Specialty</span>
+                    </div>
+                  </div>
+                  <div class="text-right">
+                    <span class="block text-[10px] font-black text-slate-800 leading-none">{{ unit.distance }}</span>
+                    <span class="block text-[8px] font-bold text-slate-400 uppercase tracking-tighter">to Target</span>
+                  </div>
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Lifecycle Timeline -->
+          <div class="bg-slate-50/50 p-10 rounded-[4rem] border border-slate-100 animate-in slide-in-from-top-4 duration-500">
+            <h3 class="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-10 text-center">Forensic Case Lifecycle</h3>
+            <div class="flex items-center justify-between relative px-8">
+              <div class="absolute top-4 left-8 right-8 h-0.5 bg-slate-200"></div>
+              
+              <div class="relative flex flex-col items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-emerald-500 border-4 border-white shadow-xl flex items-center justify-center z-10 transition-transform hover:scale-110">
+                  <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div class="text-center">
+                  <span class="block text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Digital Registry</span>
+                  <span class="block text-xs md:text-sm font-black text-slate-800">{{ selectedReport()?.created_at | date:'HH:mm' }}</span>
+                </div>
+              </div>
+
+              <div class="relative flex flex-col items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-blue-600 border-4 border-white shadow-xl flex items-center justify-center z-10 transition-transform hover:scale-110">
+                  <div class="w-2.5 h-2.5 bg-white rounded-full animate-pulse"></div>
+                </div>
+                <div class="text-center">
+                  <span class="block text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">AI Triage</span>
+                  <span class="block text-xs md:text-sm font-black text-slate-800 uppercase italic">Ready</span>
+                </div>
+              </div>
+
+              <div [class]="'relative flex flex-col items-center gap-4 transition-opacity ' + (selectedReport()?.status === 'assigned' ? 'opacity-100' : 'opacity-30')">
+                <div [class]="'w-10 h-10 rounded-full border-4 border-white shadow-xl flex items-center justify-center z-10 ' + (selectedReport()?.status === 'assigned' ? 'bg-emerald-500 text-white' : 'bg-slate-400')">
+                  <svg *ngIf="selectedReport()?.status === 'assigned'" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <div class="text-center">
+                  <span class="block text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Routing</span>
+                  <span class="block text-xs md:text-sm font-black text-slate-800 uppercase italic leading-none">
+                    {{ selectedReport()?.status === 'assigned' ? selectedReport()?.assigned_unit : 'Pending' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="space-y-4">
+              <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest block mb-1">State Configuration</span>
+              <div class="flex items-center gap-3">
+                <div [class]="'w-3 h-3 rounded-full ' + (selectedReport()?.status === 'submitted' ? 'bg-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.6)]' : selectedReport()?.status === 'assigned' ? 'bg-blue-400 shadow-[0_0_15px_rgba(96,165,250,0.6)]' : 'bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.6)]')"></div>
+                <span class="font-black text-slate-800 uppercase text-sm tracking-tight leading-none">{{ selectedReport()?.status | titlecase }}</span>
+              </div>
+            </div>
+            <div class="space-y-4">
+              <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest block mb-1">Incident Categorization</span>
+              <div *ngIf="!isEditing()" class="font-black text-slate-800 uppercase text-sm tracking-tight text-blue-600 animate-in fade-in duration-300">{{ selectedReport()?.type | titlecase }}</div>
+              <select *ngIf="isEditing()" [(ngModel)]="selectedReport()!.type" class="w-full bg-white border border-slate-200 rounded-2xl p-4 text-xs font-black uppercase tracking-widest focus:ring-4 focus:ring-blue-100 transition-all outline-none">
+                <option value="theft">Theft / Robbery</option>
+                <option value="vandalism">Vandalism</option>
+                <option value="traffic_complaint">Traffic Complaint</option>
+                <option value="noise_complaint">Noise Complaint</option>
+                <option value="suspicious_activity">Suspicious Activity</option>
+                <option value="other">Other Incident</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Location Vector</span>
+            <div class="p-8 bg-slate-50 border border-slate-100 rounded-[2.5rem] flex items-start gap-5">
+              <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm flex-shrink-0 animate-pulse"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg></div>
+              <p class="text-xl md:text-2xl font-black text-slate-800 tracking-tight leading-tight">{{ selectedReport()?.address }}</p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <span class="text-[10px] uppercase font-black text-slate-400 tracking-widest block">Operational Investigative Narrative</span>
+            <div *ngIf="!isEditing()" class="bg-slate-50 p-10 rounded-[3rem] border border-slate-100 italic text-slate-600 leading-relaxed text-lg font-medium animate-in fade-in duration-300">
+              "{{ selectedReport()?.description }}"
+            </div>
+            <textarea 
+              *ngIf="isEditing()" 
+              [(ngModel)]="selectedReport()!.description" 
+              rows="6" 
+              class="w-full p-10 bg-white border-2 border-slate-100 rounded-[3rem] focus:outline-none focus:ring-8 focus:ring-blue-100 focus:border-blue-400 transition-all text-slate-800 font-medium italic text-lg shadow-inner custom-scrollbar"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- STICKY MODAL ACTIONS -->
+        <div class="p-8 md:p-12 bg-slate-50 border-t border-slate-100 flex-shrink-0 flex flex-col sm:flex-row items-center gap-6">
+          <button 
+            *ngIf="!isEditing()" 
+            (click)="initiateAssignment()" 
+            [class]="'flex-grow w-full sm:w-auto py-6 md:py-8 rounded-[2.5rem] font-black shadow-2xl transition-all active:scale-95 group ' + (selectedReport()?.status === 'assigned' ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white')"
+            [disabled]="selectedReport()?.status === 'assigned'"
+          >
+            <span class="flex items-center justify-center gap-4 text-xs md:text-sm uppercase tracking-widest">
+              {{ selectedReport()?.status === 'assigned' ? 'Unit Assignment Locked' : 'Initiate Unit Assignment' }}
+              <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </span>
+          </button>
+          
+          <button 
+            *ngIf="isEditing()" 
+            (click)="saveEdits()"
+            class="flex-grow w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white py-6 md:py-8 rounded-[2.5rem] font-black shadow-2xl transition-all active:scale-95 group"
+          >
+            <span class="flex items-center justify-center gap-4 text-xs md:text-sm uppercase tracking-widest">
+              Save Investigative Updates
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </span>
+          </button>
+
+          <button (click)="markAsHighPriority()" class="w-full sm:w-auto bg-slate-900 hover:bg-black text-white px-10 md:px-14 py-6 md:py-8 rounded-[2.5rem] font-black shadow-2xl transition-all active:scale-95 uppercase text-[10px] md:text-xs tracking-widest">
+            {{ selectedReport()?.isHighPriority ? 'De-escalate Case' : 'Prioritize Case' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
