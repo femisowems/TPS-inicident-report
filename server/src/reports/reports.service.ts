@@ -1,48 +1,60 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Report, ReportStatus } from './report.entity';
 
 @Injectable()
 export class ReportsService {
-  private reports: Report[] = []; // Using in-memory array for demo purposes, TypeORM repository would be used in real DB
-
-  constructor(private eventEmitter: EventEmitter2) {}
+  constructor(
+    @InjectRepository(Report)
+    private readonly reportRepository: Repository<Report>,
+    private eventEmitter: EventEmitter2
+  ) {}
 
   async create(reportData: Partial<Report>): Promise<Report> {
-    const report = new Report();
-    Object.assign(report, {
+    const report = this.reportRepository.create({
       ...reportData,
-      id: Math.random().toString(36).substr(2, 9),
       status: ReportStatus.SUBMITTED,
-      created_at: new Date(),
-      updated_at: new Date(),
     });
-    this.reports.push(report);
+    
+    const savedReport = await this.reportRepository.save(report);
     
     // Emit event for workflow engine
-    this.eventEmitter.emit('report.created', report);
+    this.eventEmitter.emit('report.created', savedReport);
     
-    return report;
+    return savedReport;
   }
 
   async findAll(): Promise<Report[]> {
-    return this.reports;
+    return this.reportRepository.find({
+      order: { created_at: 'DESC' }
+    });
   }
 
   async findOne(id: string): Promise<Report> {
-    const report = this.reports.find(r => r.id === id);
-    if (!report) throw new NotFoundException('Report not found');
+    const report = await this.reportRepository.findOneBy({ id });
+    if (!report) throw new NotFoundException(`Report ${id} not found`);
     return report;
   }
 
-  async updateStatus(id: string, status: ReportStatus): Promise<Report> {
+  async updateReport(id: string, updates: Partial<Report>): Promise<Report> {
     const report = await this.findOne(id);
     const oldStatus = report.status;
-    report.status = status;
-    report.updated_at = new Date();
     
-    this.eventEmitter.emit('report.status_updated', { report, oldStatus });
-    
-    return report;
+    const updated = await this.reportRepository.save({
+      ...report,
+      ...updates
+    });
+
+    if (updates.status && updates.status !== oldStatus) {
+      this.eventEmitter.emit('report.status_updated', { report: updated, oldStatus });
+    }
+
+    return updated;
+  }
+
+  async updateStatus(id: string, status: ReportStatus): Promise<Report> {
+    return this.updateReport(id, { status });
   }
 }

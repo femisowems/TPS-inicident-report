@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
-import { UserRole } from '../auth/roles.enum';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum ReportStatus {
   SUBMITTED = 'submitted',
@@ -18,17 +17,18 @@ export enum IncidentType {
   OTHER = 'other',
 }
 
-@Entity()
+@Entity('reports')
 export class Report {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ default: 'anonymous' })
   reporter_id: string;
 
   @Column({
     type: 'enum',
     enum: IncidentType,
+    default: IncidentType.OTHER
   })
   type: IncidentType;
 
@@ -42,24 +42,27 @@ export class Report {
   @Column('text')
   description: string;
 
-  @Column('decimal', { precision: 10, scale: 8 })
+  @Column('decimal', { precision: 10, scale: 8, nullable: true })
   lat: number;
 
-  @Column('decimal', { precision: 11, scale: 8 })
+  @Column('decimal', { precision: 11, scale: 8, nullable: true })
   lng: number;
 
   @Column()
   address: string;
+
+  @Column({ default: false })
+  isHighPriority: boolean;
+
+  @Column({ nullable: true })
+  assigned_unit: string;
+
+  @Column('simple-array', { nullable: true })
+  media_urls: string[];
 
   @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @Column({ nullable: true })
-  assigned_officer_id: string;
-
-  @Column('simple-array', { nullable: true })
-  media_urls: string[];
 }

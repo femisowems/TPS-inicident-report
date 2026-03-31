@@ -5,6 +5,7 @@ import { MapPickerComponent } from '../../shared/map-picker/map-picker';
 import { IncidentType } from '../../models/report';
 import { RouterLink } from '@angular/router';
 import { ReportsService } from '../../services/report';
+import { SupabaseService } from '../../services/supabase';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs/operators';
 
@@ -13,6 +14,13 @@ interface IncidentCategory {
   label: string;
   description: string;
   icon: string;
+}
+
+export interface EvidenceFile {
+  file: File;
+  previewUrl: string | ArrayBuffer | null;
+  hash: string;
+  isHashing: boolean;
 }
 
 @Component({
@@ -25,12 +33,17 @@ interface IncidentCategory {
 export class ReportWizardComponent {
   private fb = inject(FormBuilder);
   private reportsService = inject(ReportsService);
+  private supaAuth = inject(SupabaseService);
   
   @ViewChild('stepHeading') stepHeading!: ElementRef;
   
   currentStep = signal(1);
   isSubmitting = signal(false);
   submissionStatus = signal('');
+  
+  // EVIDENCE VAULT SIGNALS
+  mediaFiles = signal<EvidenceFile[]>([]);
+  isDragging = signal(false);
   
   reportForm = this.fb.group({
     type: ['', Validators.required],
@@ -57,8 +70,8 @@ export class ReportWizardComponent {
   // Progress calculation for the new high-fidelity stepper
   progress = computed(() => {
     const step = this.currentStep();
-    if (step === 4) return 100;
-    return Math.round(((step - 1) / 3) * 100);
+    if (step === 5) return 100;
+    return Math.round(((step - 1) / 4) * 100);
   });
 
   // Rich metadata for the new Visual Category Cards
@@ -120,7 +133,7 @@ export class ReportWizardComponent {
   }
 
   nextStep() {
-    if (this.currentStep() < 3) {
+    if (this.currentStep() < 4) {
       this.currentStep.update(s => s + 1);
       this.focusHeading();
     }
@@ -149,10 +162,86 @@ export class ReportWizardComponent {
     });
   }
 
+  // EVIDENCE VAULT LOGIC
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    this.isDragging.set(true);
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    this.isDragging.set(false);
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    this.isDragging.set(false);
+    if (event.dataTransfer?.files) {
+      this.handleFiles(Array.from(event.dataTransfer.files));
+    }
+  }
+
+  onFileSelected(event: Event) {
+    const element = event.currentTarget as HTMLInputElement;
+    if (element.files) {
+      this.handleFiles(Array.from(element.files));
+    }
+  }
+
+  private handleFiles(files: File[]) {
+    const validFiles = files.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'));
+    
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const evidenceFile: EvidenceFile = {
+          file,
+          previewUrl: e.target?.result || null,
+          hash: '',
+          isHashing: true
+        };
+        
+        this.mediaFiles.update(f => [...f, evidenceFile]);
+        
+        // Simulate Cryptographic Hashing for Visual Fidelity
+        setTimeout(() => {
+          this.mediaFiles.update(currentFiles => 
+            currentFiles.map(f => f.file === file 
+              ? { ...f, isHashing: false, hash: this.generateSimulatedHash() } 
+              : f
+            )
+          );
+        }, Math.random() * 1500 + 800);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  removeFile(index: number) {
+    this.mediaFiles.update(files => files.filter((_, i) => i !== index));
+  }
+
+  private generateSimulatedHash() {
+    return Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+  }
+
   async submitReport() {
     if (this.reportForm.valid && !this.isSubmitting()) {
       this.isSubmitting.set(true);
       
+      const formValue = this.reportForm.value;
+      const mediaUrls: string[] = [];
+
+      // Secure Evidence Transmission
+      if (this.mediaFiles().length > 0) {
+        this.submissionStatus.set('Transmitting Media to Secure Vault...');
+        const tempCaseId = `draft-${Date.now()}`;
+        for (const f of this.mediaFiles()) {
+          const { publicUrl } = await this.supaAuth.uploadEvidence(f.file, tempCaseId);
+          if (publicUrl) mediaUrls.push(publicUrl);
+        }
+      }
+
       this.submissionStatus.set('Encrypting Investigative Narrative...');
       await new Promise(r => setTimeout(r, 800));
       
@@ -161,19 +250,19 @@ export class ReportWizardComponent {
       
       this.submissionStatus.set('Routing to Precinct Command...');
       await new Promise(r => setTimeout(r, 600));
-
-      const formValue = this.reportForm.value;
+      
       this.reportsService.addReport({
         type: formValue.type as any,
         description: formValue.description as string,
         lat: formValue.location?.lat as number,
         lng: formValue.location?.lng as number,
         address: formValue.location?.address as string,
-        media_urls: (formValue.media as unknown as string[]) || []
+        extraFields: formValue.extraFields,
+        media_urls: mediaUrls
       });
 
       this.isSubmitting.set(false);
-      this.currentStep.set(4);
+      this.currentStep.set(5);
       this.focusHeading();
     }
   }

@@ -2,6 +2,7 @@ import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators, FormGroup, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { SupabaseService } from '../../services/supabase';
 
 export type AuthMode = 'login' | 'signup' | 'forgot' | 'magic';
 
@@ -15,6 +16,7 @@ export type AuthMode = 'login' | 'signup' | 'forgot' | 'magic';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private supaAuth = inject(SupabaseService);
   
   loading = signal(false);
   successMessage = signal('');
@@ -59,48 +61,82 @@ export class LoginComponent {
 
   async onLogin() {
     if (this.loginForm.valid) {
-      this.executeAuthAction(() => {
-        const email = this.loginForm.get('email')?.value;
-        if (email?.includes('admin') || email?.includes('officer')) {
+      this.loading.set(true);
+      this.errorMessage.set('');
+      
+      const email = this.loginForm.get('email')?.value!;
+      const password = this.loginForm.get('password')?.value!;
+      
+      const { user, error } = await this.supaAuth.signInWithEmail(email, password);
+      
+      this.loading.set(false);
+      
+      if (error) {
+        this.errorMessage.set(error.message);
+      } else if (user) {
+        if (email.includes('admin') || email.includes('officer')) {
           this.router.navigate(['/dashboard']);
         } else {
           this.router.navigate(['/status']);
         }
-      }, 'Authenticating...');
+      }
     }
   }
 
   async onSignup() {
     if (this.signupForm.valid) {
-      this.executeAuthAction(() => {
-        this.successMessage.set('Account created! You can now sign in.');
+      this.loading.set(true);
+      this.errorMessage.set('');
+      
+      const email = this.signupForm.get('email')?.value!;
+      const password = this.signupForm.get('password')?.value!;
+      
+      const { error } = await this.supaAuth.signUp(email, password);
+      
+      this.loading.set(false);
+      
+      if (error) {
+        this.errorMessage.set(error.message);
+      } else {
+        this.successMessage.set('Account secured! Verification link injected into your email.');
         this.viewMode.set('login');
-      }, 'Creating Account...');
+      }
     }
   }
 
   async onForgotPassword() {
     if (this.forgotForm.valid) {
-      this.executeAuthAction(() => {
+      this.loading.set(true);
+      this.errorMessage.set('');
+      
+      const email = this.forgotForm.get('email')?.value!;
+      const { error } = await this.supaAuth.resetPassword(email);
+      
+      this.loading.set(false);
+      
+      if (error) {
+        this.errorMessage.set(error.message);
+      } else {
         this.successMessage.set('Recovery instructions sent to your email.');
-      }, 'Sending Recovery Email...');
+      }
     }
   }
 
   async onMagicLink() {
     if (this.magicLinkForm.valid) {
-      this.executeAuthAction(() => {
-        this.successMessage.set('Magic link sent! Check your inbox to login.');
-      }, 'Generating Magic Link...');
-    }
-  }
-
-  private executeAuthAction(action: () => void, loadingText: string) {
-    this.loading.set(true);
-    this.errorMessage.set('');
-    setTimeout(() => {
-      action();
+      this.loading.set(true);
+      this.errorMessage.set('');
+      
+      const email = this.magicLinkForm.get('email')?.value!;
+      const { error } = await this.supaAuth.sendMagicLink(email);
+      
       this.loading.set(false);
-    }, 1500);
+      
+      if (error) {
+        this.errorMessage.set(error.message);
+      } else {
+        this.successMessage.set('Magic link sent! Check your inbox to login.');
+      }
+    }
   }
 }

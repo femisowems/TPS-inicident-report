@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Report, ReportStatus } from '../../models/report';
@@ -30,7 +30,7 @@ interface TacticalUnit {
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
-export class AdminDashboard {
+export class AdminDashboard implements OnInit {
   private reportsService = inject(ReportsService);
 
   // Master signals from central service
@@ -86,7 +86,7 @@ export class AdminDashboard {
     const now = this.currentTime();
     return this.reports().map(report => ({
       ...report,
-      ageHours: (now - report.created_at.getTime()) / (1000 * 60 * 60)
+      ageHours: (now - new Date(report.created_at).getTime()) / (1000 * 60 * 60)
     }));
   });
 
@@ -130,7 +130,7 @@ export class AdminDashboard {
     }
 
     const now = this.currentTime();
-    const ageHours = (now - report.created_at.getTime()) / (1000 * 60 * 60);
+    const ageHours = (now - new Date(report.created_at).getTime()) / (1000 * 60 * 60);
     const type = report.type.toLowerCase();
 
     if (type === 'theft' || type === 'suspicious_activity') {
@@ -201,5 +201,9 @@ export class AdminDashboard {
       this.selectedReport.set({ ...report, status: ReportStatus.ASSIGNED, assigned_unit: unitId });
       this.showUnitSelector.set(false);
     }
+  }
+
+  ngOnInit() {
+    this.reportsService.fetchAllReports();
   }
 }

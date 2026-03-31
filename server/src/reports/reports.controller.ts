@@ -16,14 +16,14 @@ import { ReportStatus } from './report.entity';
 import { CreateReportDto } from './dto/create-report.dto';
 
 @Controller('reports')
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.CITIZEN)
+  @Roles(UserRole.CITIZEN, UserRole.OFFICER, UserRole.ADMIN)
   async create(@Body() createReportDto: CreateReportDto, @Request() req: any) {
+    console.log(`[TPS Security] Reached Method: POST /reports (create)`);
     return this.reportsService.create({
       ...createReportDto,
       reporter_id: req.user.id,
@@ -33,12 +33,23 @@ export class ReportsController {
   @Get()
   @Roles(UserRole.OFFICER, UserRole.ADMIN)
   async findAll() {
+    console.log(`[TPS Security] Reached Method: GET /reports (findAll)`);
     return this.reportsService.findAll();
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.reportsService.findOne(id);
+  }
+
+  @Patch(':id')
+  @Roles(UserRole.OFFICER, UserRole.ADMIN)
+  async updateReport(
+    @Param('id') id: string,
+    @Body() updates: Partial<CreateReportDto | any>
+  ) {
+    console.log(`[TPS Security] Reached Method: PATCH /reports/${id} (updateReport)`);
+    return this.reportsService.updateReport(id, updates);
   }
 
   @Patch(':id/status')

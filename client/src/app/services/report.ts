@@ -1,37 +1,19 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Report, ReportStatus } from '../models/report';
+import { SupabaseService } from './supabase';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ReportsService {
-  // Master Signal for all incidents
-  private _reports = signal<Report[]>([
-    {
-      id: 'RE-9921',
-      reporter_id: 'CIT-001',
-      type: 'theft',
-      status: ReportStatus.SUBMITTED,
-      description: 'Theft of bicycle near Union Station.',
-      address: '65 Front St W, Toronto',
-      lat: 43.6453,
-      lng: -79.3806,
-      created_at: new Date(Date.now() - 1000 * 60 * 60 * 2),
-      updated_at: new Date()
-    },
-    {
-      id: 'RE-9922',
-      reporter_id: 'CIT-002',
-      type: 'vandalism',
-      status: ReportStatus.IN_REVIEW,
-      description: 'Graffiti on the wall of the community center.',
-      address: '100 Queen St W, Toronto',
-      lat: 43.6534,
-      lng: -79.3841,
-      created_at: new Date(Date.now() - 1000 * 60 * 60 * 25),
-      updated_at: new Date()
-    }
-  ]);
+  private http = inject(HttpClient);
+  private supaAuth = inject(SupabaseService);
+  private apiUrl = `${environment.apiUrl}/reports`;
+
+  // Master Signal for all incidents (initialized empty instead of mocked)
+  private _reports = signal<Report[]>([]);
 
   // Read-only access to reports
   public reports = this._reports.asReadonly();
@@ -49,37 +31,84 @@ export class ReportsService {
   constructor() {}
 
   /**
-   * Adds a new report to the central state.
+   * Generates authorization headers using the live Supabase Session Token
    */
-  addReport(reportData: Partial<Report>) {
-    const newReport: Report = {
-      id: `RE-${Math.floor(1000 + Math.random() * 9000)}`,
-      reporter_id: 'CIT-CURRENT', 
-      type: reportData.type || 'other',
-      status: ReportStatus.SUBMITTED,
-      description: reportData.description || '',
-      lat: reportData.lat || 43.6532,
-      lng: reportData.lng || -79.3832,
-      address: reportData.address || 'Unknown Address',
-      created_at: new Date(),
-      updated_at: new Date(),
-      ...reportData
-    } as Report;
-
-    this._reports.update(current => [newReport, ...current]);
-    return newReport;
+  private async getAuthHeaders(): Promise<HttpHeaders> {
+    // Attempt to pull the active JWT from Supabase natively
+    const sessionResponse = await this.supaAuth['supabase'].auth.getSession();
+    const token = sessionResponse.data.session?.access_token || '';
+    
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
   }
 
   /**
-   * Performs reactive administrative updates to a report's record.
+   * Fetches all official incident permutations from the central database.
+   * Requires Officer or Admin authorization matrix.
    */
-  updateReport(id: string, updates: Partial<Report>) {
-    this._reports.update(all => 
-      all.map(report => 
-        report.id === id 
-          ? { ...report, ...updates, updated_at: new Date() } 
-          : report
-      )
-    );
+  async fetchAllReports() {
+    try {
+      const headers = await this.getAuthHeaders();
+      this.http.get<Report[]>(this.apiUrl, { headers }).subscribe({
+        next: (data) => this._reports.set(data),
+        error: (err) => console.error('[TPS] Secure Sync Failure: ', err)
+      });
+    } catch (e) {
+      console.error('API Error:', e);
+    }
+  }
+
+  /**
+   * Transmits a new report up to the NestJS PostgreSQL Registry.
+   */
+  async addReport(reportData: any) {
+    try {
+      const headers = await this.getAuthHeaders();
+      
+      const payload = {
+        type: reportData.type || 'other',
+        description: reportData.description || '',
+        lat: reportData.lat || 0,
+        lng: reportData.lng || 0,
+        address: reportData.address || 'Unknown Address',
+        extraFields: reportData.extraFields || {},
+        media_urls: reportData.media_urls || []
+      };
+
+      console.log('[TPS] Transmitting Record to API:', payload);
+
+      this.http.post<Report>(this.apiUrl, payload, { headers }).subscribe({
+        next: (savedReport) => {
+          console.log('[TPS] Persistent Record Created:', savedReport);
+          // Immediately project the saved record into UI memory for instant reactivity
+          this._reports.update(current => [savedReport, ...current]);
+        },
+        error: (err) => console.error('[TPS] Insertion Failure: ', err)
+      });
+    } catch (e) {
+      console.error('API Error:', e);
+    }
+  }
+
+  /**
+   * Dispatches targeted metadata updates for specific columns in the Case Record.
+   */
+  async updateReport(id: string, updates: Partial<Report>) {
+    try {
+      const headers = await this.getAuthHeaders();
+      
+      this.http.patch<Report>(`${this.apiUrl}/${id}`, updates, { headers }).subscribe({
+        next: (updatedRecord) => {
+          this._reports.update(all => 
+            all.map(report => report.id === id ? { ...report, ...updatedRecord } : report)
+          );
+        },
+        error: (err) => console.error('[TPS] Mutation Rejection: ', err)
+      });
+    } catch (e) {
+      console.error('API Error:', e);
+    }
   }
 }

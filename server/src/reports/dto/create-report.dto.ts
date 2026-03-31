@@ -1,18 +1,5 @@
-import { IsString, IsEnum, IsNotEmpty, MinLength, IsObject, ValidateNested, IsNumber, IsOptional } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsEnum, IsNotEmpty, MinLength, IsNumber, IsOptional, IsObject, IsArray } from 'class-validator';
 import { IncidentType } from '../report.entity';
-
-class LocationDto {
-  @IsNumber()
-  lat: number;
-
-  @IsNumber()
-  lng: number;
-
-  @IsString()
-  @IsNotEmpty()
-  address: string;
-}
 
 export class CreateReportDto {
   @IsEnum(IncidentType)
@@ -23,12 +10,22 @@ export class CreateReportDto {
   @MinLength(10)
   description: string;
 
-  @IsObject()
-  @ValidateNested()
-  @Type(() => LocationDto)
-  location: LocationDto;
+  @IsNumber()
+  lat: number;
+
+  @IsNumber()
+  lng: number;
+
+  @IsString()
+  @IsNotEmpty()
+  address: string;
 
   @IsOptional()
   @IsObject()
   extraFields?: Record<string, any>;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  media_urls?: string[];
 }

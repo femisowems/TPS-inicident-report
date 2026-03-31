@@ -18,6 +18,19 @@ export class RolesGuard implements CanActivate {
       return true;
     }
     const { user } = context.switchToHttp().getRequest();
-    return requiredRoles.includes(user.role);
+    console.log(`[TPS Security] Incoming Request. User data: ${JSON.stringify(user, null, 2)}`);
+    console.log(`[TPS Security] Endpoint requires roles: ${requiredRoles.join(', ')}`);
+    
+    // Explicitly cast to string for primitive comparison
+    const userRole = String(user?.role).trim().toLowerCase();
+    const isApproved = requiredRoles.some(role => String(role).trim().toLowerCase() === userRole);
+    
+    console.log(`[TPS Security] Result: ${isApproved ? 'GRANTED' : 'DENIED'}`);
+    
+    if (!isApproved) {
+      console.trace('[TPS Security] Stack Trace for 403 Denial:');
+    }
+    
+    return isApproved;
   }
 }

@@ -20,6 +20,8 @@ export interface Report {
   assigned_unit?: string;
   isHighPriority?: boolean;
   media_urls?: string[];
+  has_media?: boolean;
+  evidence_count?: number;
 }
 
 export type IncidentType = 'theft' | 'vandalism' | 'traffic_complaint' | 'noise_complaint' | 'abandoned_vehicle' | 'suspicious_activity' | 'other';
