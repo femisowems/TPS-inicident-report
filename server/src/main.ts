@@ -31,11 +31,13 @@ export default async (req: any, res: any) => {
   server(req, res);
 };
 
-// Local Development Support
-if (process.env.NODE_ENV !== 'production') {
+// Local & Production Support (Railway, etc.)
+if (process.env.NODE_ENV !== 'production' || process.env.RAILWAY_ENVIRONMENT) {
   bootstrap().then(app => {
-    const port = process.env.PORT ?? 3000;
-    app.listen(port, () => {
+    // Railway dynamically assigns a PORT environment variable.
+    // 0.0.0.0 is used to allow the internal Railway network to reach the container.
+    const port = process.env.PORT || 3000;
+    app.listen(port, '0.0.0.0', () => {
       console.log(`[TPS] Forensic Server listening on port ${port}`);
     });
   });
