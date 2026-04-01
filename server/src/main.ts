@@ -19,7 +19,11 @@ async function bootstrap(): Promise<INestApplication> {
     }));
     
     app.setGlobalPrefix('api');
-    app.enableCors();
+    app.enableCors({
+      origin: '*', // Allows any origin to make requests to the API during the migration phase
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+      credentials: true,
+    });
     await app.init();
     cachedApp = app;
   }
