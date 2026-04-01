@@ -18,6 +18,7 @@ async function bootstrap(): Promise<INestApplication> {
       transform: true,
     }));
     
+    app.setGlobalPrefix('api');
     app.enableCors();
     await app.init();
     cachedApp = app;

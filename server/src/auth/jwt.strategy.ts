@@ -2,21 +2,21 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { passportJwtSecret } from 'jwks-rsa';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
+    const jwtSecret = configService.get<string>('SUPABASE_JWT_SECRET');
+    
+    if (!jwtSecret) {
+      throw new Error('SUPABASE_JWT_SECRET is not defined in environment variables');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKeyProvider: passportJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri: `https://asouvwxujmudvvmqtuzv.supabase.co/auth/v1/.well-known/jwks.json`,
-      }),
-      algorithms: ['RS256', 'ES256', 'HS256'],
+      secretOrKey: jwtSecret,
+      algorithms: ['HS256'],
     });
   }
 
