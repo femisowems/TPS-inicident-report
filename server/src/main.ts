@@ -19,14 +19,19 @@ async function bootstrap(): Promise<INestApplication> {
     }));
     
     app.setGlobalPrefix('api');
+    const allowedOrigins = [
+      'https://tps-incident.ssowemimo.com', 
+      'https://tps-inicident-report-client.vercel.app',
+      'http://localhost:4200'
+    ];
+
+    console.log(`[TPS] Forensic Server Initializing with Origins:`, allowedOrigins);
+
     app.enableCors({
-      origin: [
-        'https://tps-incident.ssowemimo.com', 
-        'https://tps-inicident-report-client.vercel.app',
-        'http://localhost:4200'
-      ], 
+      origin: allowedOrigins, 
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true,
+      allowedHeaders: 'Content-Type,Accept,Authorization',
     });
     await app.init();
     cachedApp = app;
