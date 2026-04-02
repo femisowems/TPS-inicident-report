@@ -20,7 +20,11 @@ async function bootstrap(): Promise<INestApplication> {
     
     app.setGlobalPrefix('api');
     app.enableCors({
-      origin: ['https://tps-incident.ssowemimo.com', 'http://localhost:4200'], 
+      origin: [
+        'https://tps-incident.ssowemimo.com', 
+        'https://tps-inicident-report-client.vercel.app',
+        'http://localhost:4200'
+      ], 
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true,
     });
