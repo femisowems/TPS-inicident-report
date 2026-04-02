@@ -45,6 +45,10 @@ export class AdminDashboard implements OnInit {
   selectedReport = signal<Report | null>(null);
   filterStatus = signal<string>('all');
   
+  // Pagination State
+  currentPage = signal(1);
+  pageSize = signal(5);
+  
   // Administrative Session Signals
   isEditing = signal(false);
   showUnitSelector = signal(false);
@@ -102,6 +106,20 @@ export class AdminDashboard implements OnInit {
     return all.filter(r => r.status === status);
   });
 
+  paginatedReports = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    const end = start + this.pageSize();
+    return this.filteredReports().slice(start, end);
+  });
+
+  totalPages = computed(() => {
+    return Math.ceil(this.filteredReports().length / this.pageSize());
+  });
+
+  pages = computed(() => {
+    return Array.from({ length: this.totalPages() }, (_, i) => i + 1);
+  });
+
   // AI RESOURCE MATCHING LOGIC
   isUnitRecommended(unit: TacticalUnit): boolean {
     const report = this.selectedReport();
@@ -156,6 +174,13 @@ export class AdminDashboard implements OnInit {
 
   setFilter(status: string) {
     this.filterStatus.set(status);
+    this.currentPage.set(1); // Reset to first page on filter change
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
   }
 
   selectReport(report: Report | null) {
