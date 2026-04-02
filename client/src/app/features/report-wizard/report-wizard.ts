@@ -236,8 +236,15 @@ export class ReportWizardComponent {
       if (this.mediaFiles().length > 0) {
         this.submissionStatus.set('Transmitting Media to Secure Vault...');
         const tempCaseId = `draft-${Date.now()}`;
-        for (const f of this.mediaFiles()) {
-          const { publicUrl } = await this.supaAuth.uploadEvidence(f.file, tempCaseId);
+        for (const fileObj of this.mediaFiles()) {
+          const { publicUrl, error } = await this.supaAuth.uploadEvidence(fileObj.file, tempCaseId);
+          if (error) {
+            console.error('[TPS] Storage Upload Failed:', error.message);
+            if (error.message.includes('bucket not found')) {
+              console.error('CRITICAL: Storage bucket "evidence-vault" does not exist in Supabase!');
+            }
+            // We allow the report to continue even if images fail, but we log it
+          }
           if (publicUrl) mediaUrls.push(publicUrl);
         }
       }

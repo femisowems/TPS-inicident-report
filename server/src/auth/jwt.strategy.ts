@@ -44,13 +44,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    console.log('[TPS Security] Decoded JWT Payload:', JSON.stringify(payload, null, 2));
+    if (!payload) {
+      console.error('[TPS Security] No payload extracted from JWT');
+      return null;
+    }
     
+    console.log('[TPS Security] Decoded JWT Payload Success');
+    console.log(`- Subject (sub): ${payload.sub}`);
+    console.log(`- Role: ${payload.role}`);
+    console.log(`- Audience: ${payload.aud}`);
+
     // Determine Role: Supabase metadata -> JWT role -> Email-based heuristics -> 'citizen'
     let rawRole = payload.user_metadata?.role || payload.role;
     let userRole = typeof rawRole === 'string' ? rawRole.trim().toLowerCase() : null;
     
-    // Auto-promote system emails to admin during prototyping (override Supabase default 'authenticated' role)
+    // Auto-promote system emails to admin during prototyping
     if (payload.email) {
       const email = payload.email.toLowerCase();
       if (email.includes('admin') || email.includes('officer')) {
@@ -60,12 +68,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const finalRole = userRole === 'authenticated' ? 'citizen' : (userRole || 'citizen');
     
-    console.log(`[TPS Security] Final Resolved Role: '${finalRole}'`);
+    console.log(`- Resolved Role: '${finalRole}'`);
 
     return { 
-      id: payload.sub, 
+      id: payload.sub || payload.id, // Support both standard and custom ID fields
       email: payload.email, 
-      role: finalRole
+      role: finalRole,
+      aud: payload.aud
     };
   }
 }

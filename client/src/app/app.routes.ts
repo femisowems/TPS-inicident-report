@@ -9,5 +9,7 @@ export const routes: Routes = [
   { path: 'report', component: ReportWizardComponent },
   { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: AdminDashboard },
-  { path: 'status', component: CitizenDashboard }
+  { path: 'dashboard/tasks', redirectTo: 'dashboard' }, // Fix for the "NG04002: Cannot match any routes" error
+  { path: 'status', component: CitizenDashboard },
+  { path: '**', redirectTo: 'report' } // Global fallback
 ];
