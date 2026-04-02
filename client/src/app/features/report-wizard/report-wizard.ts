@@ -160,6 +160,13 @@ export class ReportWizardComponent {
         address: event.address
       }
     });
+
+    // Auto-Advance: 1200ms delay to allow the user to see the map 'fly'
+    setTimeout(() => {
+      if (this.currentStep() === 2) {
+        this.nextStep();
+      }
+    }, 1200);
   }
 
   // EVIDENCE VAULT LOGIC
