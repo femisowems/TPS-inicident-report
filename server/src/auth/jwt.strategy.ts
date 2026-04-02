@@ -6,18 +6,27 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
-    const jwtSecret = configService.get<string>('SUPABASE_JWT_SECRET');
-    
-    if (!jwtSecret) {
-      throw new Error('SUPABASE_JWT_SECRET is not defined in environment variables');
+    const publicKey = configService.get<string>('SUPABASE_JWT_PUBLIC_KEY');
+    const secretKey = configService.get<string>('SUPABASE_JWT_SECRET');
+
+    // Robust handling of PEM keys from env variables (handle escaped newlines)
+    const formattedPublicKey = publicKey ? publicKey.replace(/\\n/g, '\n') : null;
+    const finalKey = formattedPublicKey || secretKey;
+
+    if (!finalKey) {
+      throw new Error('Neither SUPABASE_JWT_PUBLIC_KEY nor SUPABASE_JWT_SECRET is defined');
     }
+
+    const algorithm = formattedPublicKey ? 'ES256' : 'HS256';
+    
+    console.log(`[TPS Security] Initializing Strategy with Algorithm: ${algorithm}`);
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: jwtSecret,
-      algorithms: ['HS256'],
-      audience: 'authenticated', // Explicitly match Supabase's default audience
+      secretOrKey: finalKey,
+      algorithms: [algorithm],
+      audience: 'authenticated',
     });
   }
 
