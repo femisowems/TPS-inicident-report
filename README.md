@@ -2,6 +2,8 @@
 
 An **Enterprise-Grade Municipal Command Interface** for non-emergency incident triage and forensic reporting. Built with elite UI/UX standards, modern reactive architecture, and operational intelligence.
 
+**Live Registry: [https://tps-incident.ssowemimo.com/](https://tps-incident.ssowemimo.com/)**
+
 ---
 
 ## 🚀 Tactical Core Features

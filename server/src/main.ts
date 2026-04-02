@@ -20,7 +20,7 @@ async function bootstrap(): Promise<INestApplication> {
     
     app.setGlobalPrefix('api');
     app.enableCors({
-      origin: '*', // Allows any origin to make requests to the API during the migration phase
+      origin: ['https://tps-incident.ssowemimo.com', 'http://localhost:4200'], 
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true,
     });

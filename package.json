@@ -5,6 +5,11 @@
   "author": "Municipal Public Safety Division",
   "license": "Private",
   "private": true,
+  "homepage": "https://tps-incident.ssowemimo.com/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/femisowems/TPS-inicident-report.git"
+  },
   "workspaces": [
     "client",
     "server"
