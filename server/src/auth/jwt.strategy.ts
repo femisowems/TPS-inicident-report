@@ -6,11 +6,23 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
-    const publicKey = configService.get<string>('SUPABASE_JWT_PUBLIC_KEY');
+    const rawPublicKey = configService.get<string>('SUPABASE_JWT_PUBLIC_KEY');
     const secretKey = configService.get<string>('SUPABASE_JWT_SECRET');
 
-    // Robust handling of PEM keys from env variables (handle escaped newlines)
-    const formattedPublicKey = publicKey ? publicKey.replace(/\\n/g, '\n') : null;
+    // DEEP DIAGNOSTIC LOGGING
+    console.log(`[TPS Security] Environment Check:`);
+    console.log(`- Raw Public Key Length: ${rawPublicKey?.length || 0}`);
+    console.log(`- Shared Secret Length: ${secretKey?.length || 0}`);
+
+    // Robust handling of PEM keys from env variables (handle escaped newlines and quotes)
+    const formattedPublicKey = rawPublicKey 
+      ? rawPublicKey.replace(/\\n/g, '\n').replace(/"/g, '').trim() 
+      : null;
+      
+    if (formattedPublicKey) {
+      console.log(`- Final PEM Key Starts With: ${formattedPublicKey.substring(0, 20)}...`);
+    }
+
     const finalKey = formattedPublicKey || secretKey;
 
     if (!finalKey) {
@@ -19,14 +31,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const algorithm = formattedPublicKey ? 'ES256' : 'HS256';
     
-    console.log(`[TPS Security] Initializing Strategy with Algorithm: ${algorithm}`);
+    console.log(`- Selected Algorithm: ${algorithm}`);
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: finalKey,
       algorithms: [algorithm],
-      audience: 'authenticated',
+      // TEMPORARILY REMOVED: audience: 'authenticated'
+      // This will help us see if a claim mismatch is the culprit
     });
   }
 
