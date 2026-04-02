@@ -1,4 +1,5 @@
 <div class="max-w-4xl mx-auto py-10 px-6 space-y-12 animate-in fade-in duration-700">
+  @if (currentUser()) {
   
   <!-- Premium Floating Stepper -->
   <div class="sticky top-6 z-40 bg-white/80 backdrop-blur-xl border border-white/40 shadow-2xl rounded-3xl p-6 transition-all duration-500">
@@ -433,5 +434,46 @@
       </div>
     </div>
 
-  </form>
+    </form>
+  } @else {
+    <!-- TACTICAL LOCK STATE: Citizen Portal Verification -->
+    <div class="max-w-2xl mx-auto py-24 text-center space-y-12 animate-in zoom-in-95 duration-700">
+      <div class="relative inline-flex items-center justify-center">
+        <div class="w-32 h-32 bg-blue-900 rounded-[2.5rem] flex items-center justify-center text-blue-400 shadow-2xl relative z-10">
+          <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        </div>
+        <div class="absolute inset-0 bg-blue-600 rounded-[2.5rem] animate-ping opacity-20"></div>
+      </div>
+
+      <div class="space-y-4">
+        <h1 class="text-4xl font-black text-slate-900 tracking-tighter leading-none">Identity Verification Required</h1>
+        <p class="text-slate-500 font-medium text-lg leading-relaxed italic">The Forensic Reporting Hub is restricted to secure sessions only. Please finalize your identity handshake to file an incident report.</p>
+      </div>
+
+      <div class="p-8 bg-slate-50 border border-slate-100 rounded-[3rem] space-y-6">
+        <div class="flex items-start gap-4 text-left">
+          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm flex-shrink-0 font-black text-xs">01</div>
+          <div>
+            <h3 class="text-sm font-black text-slate-800 uppercase tracking-tight">Verified Digital Intake</h3>
+            <p class="text-xs text-slate-500 font-medium tracking-tight">Authenticated reports ensure high-fidelity citizen telemetry and reduced forensic noise.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 text-left border-t border-slate-200 pt-6">
+          <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-blue-600 shadow-sm flex-shrink-0 font-black text-xs">02</div>
+          <div>
+            <h3 class="text-sm font-black text-slate-800 uppercase tracking-tight">Real-time Case Tracking</h3>
+            <p class="text-xs text-slate-500 font-medium tracking-tight">Linked sessions allow you to monitor your incident's lifecycle from intake to unit deployment.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4">
+        <a routerLink="/login" class="group bg-blue-600 hover:bg-blue-700 text-white px-10 py-6 rounded-[2.5rem] font-black shadow-2xl shadow-blue-200 transition-all active:scale-95 text-center flex items-center justify-center gap-4 uppercase tracking-widest text-xs">
+          Initiate Secure Session
+          <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+        <a routerLink="/dashboard" class="text-slate-400 hover:text-slate-700 font-black uppercase text-[10px] tracking-widest text-center py-4">Return to Public Terminal</a>
+      </div>
+    </div>
+  }
 </div>

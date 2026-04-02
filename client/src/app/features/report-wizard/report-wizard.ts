@@ -41,6 +41,9 @@ export class ReportWizardComponent {
   isSubmitting = signal(false);
   submissionStatus = signal('');
   
+  // SECURE SESSION SIGNAL
+  currentUser = this.supaAuth.currentUser;
+  
   // EVIDENCE VAULT SIGNALS
   mediaFiles = signal<EvidenceFile[]>([]);
   isDragging = signal(false);
