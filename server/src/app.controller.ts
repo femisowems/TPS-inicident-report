@@ -12,6 +12,11 @@ export class AppController {
 
   @Get('health')
   healthCheck() {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+    return { status: 'ok', timestamp: new Date().toISOString(), system: 'TPS Forensic' };
+  }
+
+  @Get('auth-test')
+  authTest() {
+    return { message: 'Security Endpoint Reachable. Send a Bearer token to verify decoding.' };
   }
 }
