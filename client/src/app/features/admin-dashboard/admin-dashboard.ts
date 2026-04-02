@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Report, ReportStatus } from '../../models/report';
 import { ReportsService } from '../../services/report';
+import { SupabaseService } from '../../services/supabase';
 
 interface ReportWithMeta extends Report {
   ageHours: number;
@@ -32,6 +33,10 @@ interface TacticalUnit {
 })
 export class AdminDashboard implements OnInit {
   private reportsService = inject(ReportsService);
+  private supabaseService = inject(SupabaseService);
+
+  // Auth State
+  currentUser = this.supabaseService.currentUser;
 
   // Master signals from central service
   reports = this.reportsService.reports;

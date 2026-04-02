@@ -22,6 +22,9 @@ export class LoginComponent {
   successMessage = signal('');
   errorMessage = signal('');
   viewMode = signal<AuthMode>('login');
+  
+  // Auth state
+  currentUser = this.supaAuth.currentUser;
 
   // --- Forms ---
   
@@ -136,6 +139,24 @@ export class LoginComponent {
         this.errorMessage.set(error.message);
       } else {
         this.successMessage.set('Magic link sent! Check your inbox to login.');
+      }
+    }
+  }
+
+  async onLogout() {
+    this.loading.set(true);
+    await this.supaAuth.signOut();
+    this.loading.set(false);
+    this.viewMode.set('login');
+  }
+
+  goToDashboard() {
+    const user = this.currentUser();
+    if (user && user.email) {
+      if (user.email.includes('admin') || user.email.includes('officer')) {
+        this.router.navigate(['/dashboard']);
+      } else {
+        this.router.navigate(['/status']);
       }
     }
   }

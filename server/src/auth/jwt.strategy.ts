@@ -9,20 +9,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const rawPublicKey = configService.get<string>('SUPABASE_JWT_PUBLIC_KEY');
     const secretKey = configService.get<string>('SUPABASE_JWT_SECRET');
 
-    // DEEP DIAGNOSTIC LOGGING
-    console.log(`[TPS Security] Environment Check:`);
-    console.log(`- Raw Public Key Length: ${rawPublicKey?.length || 0}`);
-    console.log(`- Shared Secret Length: ${secretKey?.length || 0}`);
-
-    // Robust handling of PEM keys from env variables (handle escaped newlines and quotes)
     const formattedPublicKey = rawPublicKey 
       ? rawPublicKey.replace(/\\n/g, '\n').replace(/"/g, '').trim() 
       : null;
       
-    if (formattedPublicKey) {
-      console.log(`- Final PEM Key Starts With: ${formattedPublicKey.substring(0, 20)}...`);
-    }
-
     const finalKey = formattedPublicKey || secretKey;
 
     if (!finalKey) {
@@ -30,8 +20,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     const algorithm = formattedPublicKey ? 'ES256' : 'HS256';
-    
-    console.log(`- Selected Algorithm: ${algorithm}`);
 
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

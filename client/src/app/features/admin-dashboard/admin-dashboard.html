@@ -44,6 +44,18 @@
     
     <!-- LEFT COLUMN: Incident Feed (2/3) -->
     <div class="lg:col-span-2 space-y-6">
+      
+      <!-- AUTHENTICATION WARNING -->
+      <div *ngIf="!currentUser()" class="bg-rose-50 border-2 border-rose-100 p-8 rounded-[3rem] animate-in slide-in-from-top-4 duration-1000 flex items-start gap-6">
+        <div class="w-12 h-12 bg-rose-600 rounded-2xl flex items-center justify-center text-white shadow-lg animate-pulse shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m0-6V9m0 12a9 9 0 110-18 9 9 0 010 18z"></path></svg>
+        </div>
+        <div class="space-y-1">
+          <h3 class="text-lg font-black text-rose-900 tracking-tight">Security Protocol: Session Inactive</h3>
+          <p class="text-rose-700/70 font-medium italic">You are currently not logged in. Forensic incident data and tactical unit assignments are restricted until a valid Command-Level session is established.</p>
+        </div>
+      </div>
+
       <!-- Filter Bar -->
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center space-x-2 bg-slate-200/50 p-1 rounded-2xl border border-slate-200">
