@@ -47,7 +47,7 @@ export class AdminDashboard implements OnInit {
   
   // Pagination State
   currentPage = signal(1);
-  pageSize = signal(5);
+  pageSize = signal(4);
   
   // Administrative Session Signals
   isEditing = signal(false);
