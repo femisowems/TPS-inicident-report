@@ -35,3 +35,15 @@ coverage/
 cypress/videos/
 cypress/screenshots/
 .nyc_output/
+
+# Assistant / AI metadata
+.gemini/
+.antigravity/
+.agents/
+knowledge/
+brain/
+*.md.tmp
+
+# Deployment
+.railway/
+railway.json

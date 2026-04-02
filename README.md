@@ -20,7 +20,16 @@ An **Enterprise-Grade Municipal Command Interface** for non-emergency incident t
 
 ## 🏗️ System Architecture
 
-The portal follows an **Event-Driven Micro-Workflow Architecture** to ensure sub-second triage and resource allocation.
+The portal follows an **Event-Driven Micro-Workflow Architecture** to ensure sub-second triage and resource allocation. It utilizes **Asymmetric ECC (ES256)** cryptography for command-level authentication.
+
+## 🔐 Security Protocol: ES256 Handshake
+
+The system implements a hardened identity verification layer:
+- **Asymmetric ECC**: The backend validates Supabase-issued JWTs using an **ES256 (Elliptic Curve)** public key.
+- **Identity Integrity**: Roles (`admin`, `citizen`) are extracted directly from the signed claims to prevent privilege escalation.
+- **Environment Isolation**: Production secrets are managed via Railway's encrypted vault.
+
+## 🏗️ Model Architecture
 
 ```mermaid
 graph TD
