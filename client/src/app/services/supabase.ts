@@ -58,6 +58,21 @@ export class SupabaseService {
     return { error };
   }
 
+  async updateEmail(newEmail: string): Promise<{ error: Error | null }> {
+    const { error } = await this.supabase.auth.updateUser({ email: newEmail });
+    return { error };
+  }
+
+  async updatePassword(newPassword: string): Promise<{ error: Error | null }> {
+    const { error } = await this.supabase.auth.updateUser({ password: newPassword });
+    return { error };
+  }
+
+  async updateUserMetadata(metadata: Record<string, unknown>): Promise<{ error: Error | null }> {
+    const { error } = await this.supabase.auth.updateUser({ data: metadata });
+    return { error };
+  }
+
   // --- EVIDENCE VAULT STORAGE --- //
 
   /**

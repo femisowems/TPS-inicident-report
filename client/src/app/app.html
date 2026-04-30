@@ -51,8 +51,12 @@
             </div>
             
             <div class="flex items-center bg-white/5 p-1 rounded-full border border-white/10 shadow-xl group-hover:border-emerald-500/30 transition-all">
-              <a routerLink="/login" class="w-8 h-8 bg-blue-600 hover:bg-emerald-500 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg transition-all active:scale-90">ID</a>
-              <button (click)="onLogout()" class="ml-4 mr-4 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-colors">Term Session</button>
+              <a routerLink="/account" class="w-8 h-8 bg-blue-600 hover:bg-emerald-500 rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg transition-all active:scale-90" title="Account Settings">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+              </a>
+              <a routerLink="/account" class="ml-2 mr-1 text-[9px] font-black uppercase tracking-widest text-blue-200/60 hover:text-white transition-colors px-2">Account</a>
+              <span class="w-px h-4 bg-white/10"></span>
+              <button (click)="onLogout()" class="ml-1 mr-3 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-rose-500 transition-colors">Term Session</button>
             </div>
           </div>
         }
