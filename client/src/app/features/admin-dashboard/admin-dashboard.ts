@@ -1,6 +1,7 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Report, ReportStatus } from '../../models/report';
 import { ReportsService } from '../../services/report';
 import { SupabaseService } from '../../services/supabase';
@@ -27,7 +28,7 @@ interface TacticalUnit {
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css',
 })
