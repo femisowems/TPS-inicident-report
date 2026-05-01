@@ -1,4 +1,33 @@
 <div class="max-w-4xl mx-auto py-10 px-6 space-y-12 animate-in fade-in duration-700">
+  
+  <!-- Mobile-Only Desktop Optimization Gate -->
+  <div class="md:hidden fixed inset-0 z-[9999] flex items-center justify-center p-6" style="background: radial-gradient(circle at 50% 50%, rgba(30, 58, 138, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);">
+    <div class="bg-white rounded-[3rem] shadow-2xl max-w-sm w-full p-10 text-center space-y-8 animate-in zoom-in-95 duration-500">
+      <!-- Monitor Icon -->
+      <div class="flex justify-center">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-[2rem] flex items-center justify-center">
+          <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20m0 0l-.75 3M9 20h6m-6 0l.75 3M15 17l.75 3m0 0l.75-3M4 12a8 8 0 018-8m0 0a8 8 0 018 8m0 0H4m16 0a8 8 0 01-8 8m0 0H4m0 0a8 8 0 008 8m0 0v-3m0-3v3"></path>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Heading -->
+      <div>
+        <h2 class="text-2xl font-black text-slate-900 tracking-tight mb-3">TPS Incident Report: Desktop Recommended</h2>
+        <p class="text-slate-600 font-medium leading-relaxed">The TPS Incident Report Supabase RLS Simulator is designed for full-featured desktop environments. For the best experience, please access this application from a larger screen.</p>
+      </div>
+
+      <!-- Info Pill -->
+      <div class="inline-block px-4 py-2 bg-blue-50 border border-blue-200 rounded-full">
+        <span class="text-xs font-black text-blue-700 uppercase tracking-widest">TPS INCIDENT REPORT • DESKTOP (>=768px)</span>
+      </div>
+
+      <!-- Action Hint -->
+      <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">You can still continue, but some features may be limited</p>
+    </div>
+  </div>
+
   @if (currentUser()) {
   
   <!-- Premium Floating Stepper -->
