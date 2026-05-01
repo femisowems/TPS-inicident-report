@@ -1,89 +1,110 @@
-# 🏛️ Citizen Incident Reporting Portal
+# TPS Incident Report
 
-An **Enterprise-Grade Municipal Command Interface** for non-emergency incident triage and forensic reporting. Built with elite UI/UX standards, modern reactive architecture, and operational intelligence.
+Monorepo for the TPS Incident Report platform. The project includes:
 
-**Live Registry: [https://tps-incident.ssowemimo.com/](https://tps-incident.ssowemimo.com/)**
+- A public-facing Angular client for report submission and status tracking.
+- A NestJS API for authentication, report workflows, and operational dashboards.
 
----
+Live URL: https://tps-incident.ssowemimo.com/
 
-## 🚀 Tactical Core Features
+## Preview
 
-### 🛡️ Officer Command Center (Admin Dashboard)
-- **AI Triage Prioritization**: Dynamic classification (P1–P4) based on incident type and SLA age. High-priority cases feature a **Rose-Red Pulse** alert in the live feed.
-- **Forensic Lifecycle Timeline**: Visual, immutable chronology tracking the case from **Digital Registry** to **AI Triage** and **Precinct Routing**.
-- **Tactical Unit Assignment**: Real-time roster for dispatching specialized units (K9, Traffic, Tactical) with AI-driven resource matching recommendations.
+![TPS Incident Report Dashboard Preview](docs/images/tps-incident-dashboard-preview.png)
 
-### 📝 Reactive Forensic Reporting Wizard
-- **Forensic Validation**: Multi-stage reporting flow with strict field integrity checks.
-- **Secure Signal Architecture**: Built using **Angular Signals** for zero-latency UI reactivity and instant metadata rendering.
-- **Encryption-First**: TLS 256-bit secure transmission branding to reinforce public trust.
+Place the screenshot at `docs/images/tps-incident-dashboard-preview.png` to render this preview.
 
----
+## Repository Structure
 
-## 🏗️ System Architecture
-
-The portal follows an **Event-Driven Micro-Workflow Architecture** to ensure sub-second triage and resource allocation. It utilizes **Asymmetric ECC (ES256)** cryptography for command-level authentication.
-
-## 🔐 Security Protocol: ES256 Handshake
-
-The system implements a hardened identity verification layer:
-- **Asymmetric ECC**: The backend validates Supabase-issued JWTs using an **ES256 (Elliptic Curve)** public key.
-- **Identity Integrity**: Roles (`admin`, `citizen`) are extracted directly from the signed claims to prevent privilege escalation.
-- **Environment Isolation**: Production secrets are managed via Railway's encrypted vault.
-
-## 🏗️ Model Architecture
-
-```mermaid
-graph TD
-    A[Citizen Reporting Wizard] -->|Forensic Signal| B[NestJS API Gateway]
-    B --> C[Incident Registry]
-    C -->|Birth Event| D[Reactive Triage Engine]
-    D --> E{AI Priority Logic}
-    E -->|P1/Emergent| F[Tactical Dispatch Alert]
-    E -->|P4/Standard| G[Operational Queue]
-    F --> H[Officer Command Dash]
-    G --> H
-    H -->|Manual Command| I[Unit Assignment Workflow]
+```text
+.
+├── client/   # Angular app (@incident-report/client)
+├── server/   # NestJS API (@incident-report/server)
+├── README.md
+└── package.json (workspace root)
 ```
 
-### 🧠 Performance & Scalability
-- **Signal-Driven UX**: Angular Signals eliminate unnecessary change detection, providing a buttery-smooth 60fps experience even on municipal terminals.
-- **Glassmorphism Design System**: High-trust, semi-translucent UI with `backdrop-blur-xl` for modern aesthetic depth.
+## Tech Stack
 
----
+- Frontend: Angular 21, Tailwind CSS 4, RxJS
+- Backend: NestJS 11, TypeORM, PostgreSQL, JWT Auth
+- Infra/Deploy: Railway, Vercel-compatible client build, npm workspaces
 
-## 📥 Getting Started
+## Prerequisites
 
-### Prerequisites
-- Node.js (v20+)
-- NPM Workspaces 
+- Node.js 22+
+- npm 10+
 
-### One-Command Development
-This project uses **Concurrent Workspaces** for an elite developer experience.
+## Quick Start
+
+From repository root:
 
 ```bash
-# 1. Install all dependencies (Monorepo)
 npm run install:all
-
-# 2. Launch Universal Dev Environment (Client + Server)
 npm run dev
 ```
 
-### Operational Scripts
-| Command | Result |
-| :--- | :--- |
-| `npm run build:all` | Compiles the entire forensic cluster (Client & Server). |
-| `npm run lint:all` | Executes strict syntax & integrity checks across the monorepo. |
-| `npm run clean` | Purges all compiled artifacts and local cache. |
+Default local services:
 
----
+- Client: http://localhost:4200
+- Server: http://localhost:3000 (or configured `PORT`)
 
-## 📊 Technical Stack
-- **Frontend**: Angular 19 (Standalone), Tailwind CSS, Signals.
-- **Backend**: NestJS, TypeScript, Event-Emitter2.
-- **Intelligence**: Custom Priority Scoring & Resource Matching Logic.
-- **Security**: RBAC (Citizen/Officer/Admin), JWT-Auth, TLS-Encryption.
+## Workspace Scripts (Root)
 
----
+| Script                 | Description                                               |
+| ---------------------- | --------------------------------------------------------- |
+| `npm run dev`          | Runs client and server concurrently in watch mode.        |
+| `npm run dev:client`   | Starts Angular dev server only.                           |
+| `npm run dev:server`   | Starts NestJS in watch mode only.                         |
+| `npm run build`        | Builds client then server.                                |
+| `npm run build:client` | Builds Angular client.                                    |
+| `npm run build:server` | Builds NestJS server.                                     |
+| `npm run test`         | Runs client tests then server tests.                      |
+| `npm run lint`         | Runs server linting.                                      |
+| `npm run clean`        | Removes workspace build artifacts and local dependencies. |
 
-*This system facilitates Digital Transformation by reducing manual triage time and providing authoritative incident oversight.*
+## Environment Variables
+
+Create local `.env` files as needed (typically in `server/` and `client/`).
+
+Typical backend variables:
+
+- `PORT`
+- `DATABASE_URL`
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+- `SUPABASE_JWT_SECRET`
+- Any app-specific auth/role configuration variables used in `server/src`
+
+Keep secrets out of source control. See `.gitignore` for ignored env patterns.
+
+## Build and Run in Production
+
+### Client
+
+```bash
+npm run build:client
+npm run start:client
+```
+
+### Server
+
+```bash
+npm run build:server
+npm run start:server
+```
+
+## Deployment Notes
+
+- Root `railway.toml` is configured for backend deployment in this monorepo.
+- `client/railway.toml` can be used for frontend hosting when deploying client separately.
+- Ensure Railway/Vercel environment variables are set before promoting builds.
+
+## Development Guidelines
+
+- Use root scripts for day-to-day development in the monorepo.
+- Keep client and server dependencies scoped to their workspace unless truly shared.
+- Run `npm run build` before merging major changes.
+
+## License
+
+UNLICENSED - Internal project.
